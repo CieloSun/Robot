@@ -33,53 +33,53 @@ public class MyRobot extends Agent
     {
         super(position, name);
 
-        bumpers = RobotFactory.addBumperBeltSensor(this);
-        sonars = RobotFactory.addSonarBeltSensor(this);
-        lamp = RobotFactory.addLamp(this);
-        origin = position;// 起点位置
+        bumpers = RobotFactory.addBumperBeltSensor(this);//the bumper sensor
+        sonars = RobotFactory.addSonarBeltSensor(this);//the sonar sensor
+        lamp = RobotFactory.addLamp(this);//the instruction lump
+        origin = position;// the origin position
 
     }
 
     public Vector3d getVelocity()
     {
-        return this.linearVelocity; //线速度
+        return this.linearVelocity; //linear velocity
     }
 
-    private int getQuadrant(Vector2d vector) //计算向量的象限
+    private int getQuadrant(Vector2d vector) //cal the quadrant of the agent
     {
         double x = vector.x;
         double y = vector.y;
-        if (x > 0 && y > 0)// 第一象限
+        if (x > 0 && y > 0)// first quadrant
         {
             return 1;
-        } else if (x < 0 && y > 0)// 第二象限
+        } else if (x < 0 && y > 0)// second quadrant
         {
             return 2;
-        } else if (x <0 && y < 0)// 第三象限
+        } else if (x <0 && y < 0)// third quadrant
         {
             return 3;
-        } else if (x > 0 && y <0)// 第四象限
+        } else if (x > 0 && y <0)// fouth quadrant
         {
             return 4;
-        } else if (x > 0 && y == 0)// x正半轴
+        } else if (x > 0 && y == 0)// x+
         {
             return -1;
-        } else if (x == 0 && y > 0)// y正半轴
+        } else if (x == 0 && y > 0)// y+
         {
             return -2;
-        } else if (x <0 && y == 0)// x负半轴
+        } else if (x <0 && y == 0)// x-
         {
             return -3;
-        } else if (x == 0 && y <0)// y负半轴
+        } else if (x == 0 && y <0)// y-
         {
             return -4;
         } else
         {
-            return 0;
+            return 0;//original porint
         }
     }
 
-    private double getAngle(Vector2d v1, Vector2d v2) //计算两个向量之间的弧度角
+    private double getAngle(Vector2d v1, Vector2d v2) //cal rad of two vectors
     {
 
         double k = v1.y / v1.x;
@@ -160,9 +160,9 @@ public class MyRobot extends Agent
 
     private Vector2d transform(Vector2d v, Vector2d point)
     {
-        Vector2d global = new Vector2d(1, 0); //向量（1,0）
-        double alfa = getAngle(global, v); //向量V与X夹角
-        double beta = getAngle(point,v ); //
+        Vector2d global = new Vector2d(1, 0); //（1,0）,means the x-axis
+        double alfa = getAngle(global, v); //the rad of v with x
+        double beta = getAngle(point,v ); //the rad of point with v
 
         double k1 = Math.cos(alfa + beta) / Math.cos(beta);
         double k2 = Math.sin(alfa + beta) / Math.sin(beta);
