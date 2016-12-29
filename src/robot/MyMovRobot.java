@@ -34,7 +34,7 @@ public class MyMovRobot extends Agent {
         }else
             lamp.setBlink(false);
 
-        if(getCounter()%70 == 0){
+        if(getCounter()%100 == 0){
             speed = -speed;
             setTranslationalVelocity(speed);
         }

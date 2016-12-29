@@ -53,7 +53,7 @@ public class Controller extends Demo
         a1.rotate90(1);
         add(a1);
          
-        add(new MyRobot(new Vector3d(-9, 0, -8), "MyRobot"));
+        add(new AttractForceRobot(new Vector3d(-9, 0, -8), "AttractForceRobot"));
         add(new MyMovRobot(new Vector3d(0, 0, 3), "MyMovRobot"));
 	}
 
