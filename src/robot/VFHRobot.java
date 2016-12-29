@@ -13,161 +13,93 @@ import javax.vecmath.Vector3d;
  * Created by 63289 on 2016/12/28.
  * 使用人工势场法进行运动的agent
  */
-public class VFHRobot extends Agent {
-    private static final double repelConstant = 100.0;// 斥力系数
-    private static final double attractConstant = 30.0;// 引力系数
-    // 全局目标坐标
-    private Vector2d goal = new Vector2d(8, 8);
-    private Vector3d goal3d = new Vector3d(8, 0, 8);
-
-    private RangeSensorBelt sonars, bumpers;
-    private LampActuator lamp;
-    private Vector3d origin = null;
+public class VFHRobot extends RobotBase {
+    //置信数
+    private Long[][] cv = new Long[21][21];
+    //存储向量
+    private Double[][] m = new Double[21][21];
 
     public void initBehavior() {
+        setTranslationalVelocity(speed);
     }
 
-    public VFHRobot(Vector3d origin,Vector3d goal3d, String name) {
-        super(origin, name);
-
-        bumpers = RobotFactory.addBumperBeltSensor(this);//the bumper sensor
-        sonars = RobotFactory.addSonarBeltSensor(this);//the sonar sensor
-        lamp = RobotFactory.addLamp(this);//the instruction lump
-        this.origin = origin;// the origin position
-        this.goal3d=goal3d;
-        this.goal.setX(goal3d.getX());
-        this.goal.setY(goal3d.getZ());
+    public VFHRobot(Vector3d origin, Vector3d goal3d, String name) {
+        super(origin, goal3d, name);
+        for (int i = 0; i < 21; ++i) {
+            for (int j = 0; j < 21; ++j) {
+                cv[i][j] = new Long(0);
+                m[i][j] = new Double(0.0);
+            }
+        }
+        speed = 0.5;
     }
 
-    public Vector3d getVelocity() {
-        return this.linearVelocity; //linear velocity
+    private void setCv(int x, int y, Long val) {
+        for (int i = 0; i < 21; ++i) {
+            for (int j = 0; j < 21; ++j) {
+                System.out.print(getCv(x, y) + " ");
+            }
+            System.out.println();
+        }
+        System.out.println(val);
+        cv[(int) x + 10][y + 10] = val;
     }
 
-    private int getQuadrant(Vector2d vector) //cal the quadrant of the agent
-    {
-        double x = vector.x;
-        double y = vector.y;
-        if (x > 0 && y > 0)// first quadrant
-        {
-            return 1;
-        } else if (x < 0 && y > 0)// second quadrant
-        {
-            return 2;
-        } else if (x < 0 && y < 0)// third quadrant
-        {
-            return 3;
-        } else if (x > 0 && y < 0)// fouth quadrant
-        {
-            return 4;
-        } else if (x > 0 && y == 0)// x+
-        {
-            return -1;
-        } else if (x == 0 && y > 0)// y+
-        {
-            return -2;
-        } else if (x < 0 && y == 0)// x-
-        {
-            return -3;
-        } else if (x == 0 && y < 0)// y-
-        {
-            return -4;
-        } else {
-            return 0;//original porint
+    private final Long getCv(int x, int y) {
+        return cv[x + 10][y + 10];
+    }
+
+    private void setM(int x, int y, Double dis) {
+        m[x + 10][y + 10] = -getCv(x, y) * getCv(x, y) / dis * 0.1;
+    }
+
+    private final Double getM(int x, int y) {
+        return m[x + 10][y + 10];
+    }
+
+    private void calEnvironment(Vector2d now) {
+        for (int i = 0; i < 9; ++i) {
+            Double dis = new Double(sonars.getMeasurement(i));
+            Double deltaX = dis * (Math.cos(i * 40));
+            Double deltaY = dis * (Math.sin(i * 40));
+            long lnx = Math.round(now.getX() + deltaX);//标记此点的障碍权重
+            long lny = Math.round(now.getY() + deltaY);
+            int nx = (int) lnx;
+            int ny = (int) lny;
+            if (nx <= 10 && nx >= -10 && ny <= 10 && ny >= -10) {
+                System.out.println("nx:" + nx + " ny:" + ny);
+                setCv(nx, ny, new Long(1) + getCv(nx, ny));
+                setM(nx, ny, dis);
+            }
         }
     }
 
-    private double getAngle(Vector2d v1, Vector2d v2) //cal rad of two vectors
-    {
-
-        double k = v1.y / v1.x;
-        double y = k * v2.x;
-        switch (getQuadrant(v1)) {
-            case 1:
-            case 4:
-            case -1:
-                if (v2.y > y) {
-                    return v1.angle(v2); //两个向量之间的夹角弧度
-                } else if (v2.y < y) {
-                    return 2 * Math.PI - v1.angle(v2);
-                } else {
-                    if (v1.x * v2.x < 0) {
-                        return Math.PI;
-                    } else {
-                        return 0;
-                    }
-                }
-            case 2:
-            case 3:
-            case -3:
-                if (v2.y > y) {
-                    return 2 * Math.PI - v1.angle(v2);
-                } else if (v2.y < y) {
-                    return v1.angle(v2);
-                } else {
-                    if (v1.x * v2.x < 0) {
-                        return Math.PI;
-                    } else {
-                        return 0;
-                    }
-                }
-            case -2:
-                int i = getQuadrant(v2);
-                if (i == -4) {
-                    return Math.PI;
-                } else if (i == -2 || i == -1 || i == 1 || i == 4) {
-                    return 2 * Math.PI - v1.angle(v2);
-                } else {
-                    return v1.angle(v2);
-                }
-            case -4:
-                int j = getQuadrant(v2);
-                if (j == -1) {
-                    return Math.PI;
-                } else if (j == -4 || j == -1 || j == 1 || j == 4) {
-                    return v1.angle(v2);
-                } else {
-                    return 2 * Math.PI - v1.angle(v2);
-                }
-            default:
-                return -1;
-        }
-
-    }
-
-    private Vector2d transform(Vector2d v, Vector2d point) {
-        Vector2d global = new Vector2d(1, 0); //（1,0）,means the x-axis
-        double alfa = getAngle(global, v); //the rad of v with x
-        double beta = getAngle(point, v); //the rad of point with v
-
-        double k1 = Math.cos(alfa + beta) / Math.cos(beta);
-        double k2 = Math.sin(alfa + beta) / Math.sin(beta);
-
-        double x = point.x * k1;
-        double y = point.y * k2;
-
-        return new Vector2d(x, y);
-
-    }
-
-    private boolean checkGoal() //检查是否到达目的地
-    {
-
-        Point3d currentPos = new Point3d();
-        getCoords(currentPos); //当前坐标
-        Point3d goalPos = new Point3d(goal3d.x, goal3d.y, goal3d.z);
-
-        if (currentPos.distance(goalPos) <= 0.5) // 如果当前距离目标点小于0.5那么即认为是到达
-        {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public void performBehavior() {
-        // 为了防止智能体剧烈晃动，每10帧计算一次受力
-        if (getCounter() % 10 == 0) {
-
+        checkGoal();
+        Vector3d velocity = getVelocity(); //获取速度
+        Vector2d direct = new Vector2d(velocity.z, velocity.x); //前进的方向向量
+        Point3d p = new Point3d();
+        getCoords(p);
+        Vector2d pos = new Vector2d(p.z, p.x);
+        calEnvironment(pos);
+        double xForce = 0;
+        double yForce = 0;
+        for (int i = -10; i <= 10; ++i) {
+            for (int j = -10; j <= 10; ++j) {
+                xForce += getM(i, j) * (i - pos.getX()) / Math.sqrt((i - pos.getX()) * (i - pos.getX()) + (j - pos.getY()) * (j - pos.getY()));
+                yForce += getM(i, j) * (j - pos.getY()) / Math.sqrt((i - pos.getX()) * (i - pos.getX()) + (j - pos.getY()) * (j - pos.getY()));
+            }
         }
+        Vector2d composition = new Vector2d(xForce + goal.getX() - pos.getX(), yForce + goal.getY() - pos.getY());//合力
+        Vector2d forceVector = transform(direct, composition);
+        double angle = getAngle(direct, forceVector);
+        // 判断转动方向
+        if (angle < Math.PI) {
+            setRotationalVelocity(angle);
+        } else if (angle > Math.PI) {
+            setRotationalVelocity((angle - 2 * Math.PI));
+        }
+        checkHit();
     }
 }

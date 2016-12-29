@@ -54,6 +54,7 @@ public class Controller extends Demo
         add(a1);
          
         add(new AttractForceRobot(new Vector3d(-9, 0, -8),new Vector3d(8, 0, 8), "AttractForceRobot"));
+        add(new VFHRobot(new Vector3d(9, 0, -8),new Vector3d(8, 0, 8), "VFHRobot"));
         add(new MovObstacle(new Vector3d(0, 0, 3), "MovObstacle"));
 	}
 
