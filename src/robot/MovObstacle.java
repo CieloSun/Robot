@@ -10,13 +10,13 @@ import javax.vecmath.Vector3d;
 /**
  * Created by 63289 on 2016/12/28.
  */
-public class MyMovRobot extends Agent {
+public class MovObstacle extends Agent {
 
     RangeSensorBelt sonars,bumpers;
     LampActuator lamp;
     double speed = 0.5;
 
-    public MyMovRobot(Vector3d position, String name) {
+    public MovObstacle(Vector3d position, String name) {
         super(position,name);
         bumpers = RobotFactory.addBumperBeltSensor(this);
         sonars = RobotFactory.addSonarBeltSensor(this,24);
