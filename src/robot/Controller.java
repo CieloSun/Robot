@@ -57,9 +57,9 @@ public class Controller extends Demo
 
         Box b4 = new Box(new Vector3d(-6,0,2), new Vector3f(1, 2, 8),this);
         add(b4);
-        //光敏机器人
+        //显示光敏机器人
         add(new LightRobot(new Vector3d(-9, 0, 3),goal3d,"LightRobot"));
-        //人工势力场机器人
+        //显示人工势场机器人
         add(new ForceRobot(new Vector3d(-9, 0, -8),goal3d, "ForceRobot"));
 	}
 

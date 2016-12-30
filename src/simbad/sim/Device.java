@@ -46,7 +46,7 @@ public abstract class Device extends BaseObject{
         updatePerSecond = 1.0;
         elapsedSinceUpdate = 0.0;
         firstUpdate = true;
-        updateOnEachFrame =false;;
+        updateOnEachFrame =false;
     }
     /**
      * @return device's name .

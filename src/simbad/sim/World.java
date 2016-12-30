@@ -554,7 +554,7 @@ public  class World   {
         canvas3d.startRenderer();
        
         try {
-            Thread.sleep((int)(100));
+            Thread.sleep(100);
         } catch (InterruptedException e) {
            
             e.printStackTrace();

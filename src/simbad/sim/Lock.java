@@ -28,9 +28,9 @@ package simbad.sim;
  * A Simple lock for mutual exclusion.
  */
 public class Lock  {
-    boolean locked = false;;
-    
-    
+    boolean locked = false;
+
+
     Lock(){    }
  
     /** Obtain the lock. Only one thread at each time.*/ 

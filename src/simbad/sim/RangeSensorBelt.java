@@ -558,7 +558,7 @@ public class RangeSensorBelt extends PickSensor {
            int cx,cy;
            cx=cy=IMAGE_SIZEX/4;
            // display factor
-           float f = (float)cx/(float)(maxRange+radius);
+           float f = (float)cx/ (maxRange+radius);
            int r = (int)(radius*f);
            g.setColor(Color.BLUE);
            g.drawOval(cx-r,cy-r,2*r,2*r);

@@ -43,7 +43,7 @@ public class SensorMatrix extends SensorData{
     public SensorMatrix(SensorMatrix lm) {
         this.width = lm.width;
         this.height = lm.height;
-        this.array = (float[]) lm.array.clone();
+        this.array = lm.array.clone();
     }
 
     /** Return the matrix height in pixels. */

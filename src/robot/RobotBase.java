@@ -21,28 +21,28 @@ public class RobotBase extends Agent {
     protected LampActuator lamp;
     public RobotBase(Vector3d origin, Vector3d goal3d, String name){
         super(origin,name);
-        bumpers = RobotFactory.addBumperBeltSensor(this);//the bumper sensor
-        lamp = RobotFactory.addLamp(this);//the instruction lump
-        this.origin = origin;// the origin position
+        //震动感应器
+        bumpers = RobotFactory.addBumperBeltSensor(this);
+        //指示灯
+        lamp = RobotFactory.addLamp(this);
+        this.origin = origin;
         this.goal3d = goal3d;
         this.goal.setX(goal3d.getX());
         this.goal.setY(goal3d.getZ());
     }
     public void initBehavior() {
     }
-    protected void checkGoal() //检查是否到达目的地
+    //检查是否到达目的地
+    protected void checkGoal()
     {
         double speed=getTranslationalVelocity();
         boolean checkGoal = false;
         Point3d currentPos = new Point3d();
-        getCoords(currentPos); //当前坐标
+        //当前坐标
+        getCoords(currentPos);
         Point3d goalPos = new Point3d(goal3d.x, goal3d.y, goal3d.z);
-        if (currentPos.distance(goalPos) <= 0.5) // 如果当前距离目标点小于0.5那么即认为是到达
-        {
-            checkGoal = true;
-        } else {
-            checkGoal = false;
-        }
+        // 如果当前距离目标点小于0.5那么即认为是到达
+        checkGoal = currentPos.distance(goalPos) <= 0.5;
         if (checkGoal) {
             // 到达目标点，停止运动
             setTranslationalVelocity(0);

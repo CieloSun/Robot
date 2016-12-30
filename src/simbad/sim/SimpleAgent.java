@@ -232,10 +232,9 @@ public  class SimpleAgent extends BaseObject {
         // no motor by default
         linearAcceleration.set(0,0,0);
         angularAcceleration.set(0,0,0);
-    };
-    
+    }
 
-    
+
     /** Perform acceleration integration step .*/
     protected void integratesVelocities(double dt){
         v1.set(linearAcceleration);

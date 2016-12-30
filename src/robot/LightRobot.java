@@ -46,7 +46,7 @@ public class LightRobot extends RobotBase {
         sensorFrontRight = RobotFactory.addLightSensorRight(this);
         Vector3d front = new Vector3d(getRadius() + 0.5, 0, 0);
         sensorRearLeft = addLightSensorRearLeft(this);
-        sensorRearRight = addLightSensorRearRight(this);        ;
+        sensorRearRight = addLightSensorRearRight(this);
     }
     static public LightSensor addLightSensorRearRight(Agent agent) {
         Vector3d front = new Vector3d(agent.getRadius() + 0.5, 0, 0);
