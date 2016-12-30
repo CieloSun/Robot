@@ -1,7 +1,5 @@
 package robot;
 
-import simbad.sim.Agent;
-import simbad.sim.LampActuator;
 import simbad.sim.RangeSensorBelt;
 import simbad.sim.RobotFactory;
 
@@ -15,65 +13,65 @@ import javax.vecmath.Vector3d;
  */
 public class ForceRobot extends RobotBase {
 
-    protected static final double repelConstant = 100.0;// 斥力系数
-    protected double attractConstant = 30.0;// 引力系数
-    protected double speed=0.5;
+    private static final double repelConstant = 100.0;// 斥力系数
+    private static final double rangeConst = 4.0;//斥力作用范围
+    private double attractConstant = 30.0;// 引力系数
+    private RangeSensorBelt sonars;
+    private double speed = 0.5;
     public ForceRobot(Vector3d origin, Vector3d goal3d, String name) {
         super(origin, goal3d, name);
         sonars = RobotFactory.addSonarBeltSensor(this);//the sonar sensor
-        speed=1;
+        speed = 1;
     }
     public void initBehavior() {
         setTranslationalVelocity(speed);
     }
     public void performBehavior() {
-        if (getCounter() % 5 == 0) {
-            checkGoal();
-            //获取速度
+        if (getCounter() % 10 == 0) {
             Vector3d velocity = getVelocity();
-            //前进的方向向量
             Vector2d direct = new Vector2d(velocity.z, velocity.x);
-            Point3d p = new Point3d();
-            getCoords(p);
-            Vector2d pos = new Vector2d(p.z, p.x);
-            // 正前方障碍物距离
-            double d0 = sonars.getMeasurement(0);
-            //左前方障碍物距离
-            double d1 = sonars.getMeasurement(1);
-            //右前方障碍物距离
-            double d2 = sonars.getMeasurement(8);
-            //三个方向的斥力
-            double rf0 = repelForce(d0, 4.0);
-            double rf1 = repelForce(d1, 4.0);
-            double rf2 = repelForce(d2, 4.0);
-            // 计算斥力的合力
-            double k1 = Math.cos(2 * Math.PI / 9);
-            double k2 = Math.sin(2 * Math.PI / 9);
-            Vector2d vf0 = new Vector2d(0 - rf0, 0);
-            Vector2d vf1 = new Vector2d((0 - rf1 * k1), (0 - rf1 * k2));
-            Vector2d vf2 = new Vector2d((rf2 * k1), (rf2 * k2));
-            Vector2d composition = new Vector2d(vf0.x + vf1.x + vf2.x, vf0.y + vf1.y + vf2.y);//合力
-            Vector2d repelForceVector = transform(direct, composition);
+            Point3d posPoint = new Point3d();
+            //获取当前位置
+            getCoords(posPoint);
+            Vector2d pos = new Vector2d(posPoint.z, posPoint.x);
+            double frontDistance = sonars.getMeasurement(0);
+            double frontLeftDistance = sonars.getMeasurement(1);
+            double frontRightDistance = sonars.getMeasurement(8);
+            double frontRepelForce = repelForce(frontDistance, rangeConst);
+            double frontLeftRepelForce = repelForce(frontLeftDistance, rangeConst);
+            double frontRightRepelForce = repelForce(frontRightDistance, rangeConst);
+            double cosConst = Math.cos(2 * Math.PI / 9);
+            double sinConst = Math.sin(2 * Math.PI / 9);
+            Vector2d fontRepelVector = new Vector2d(0 - frontRepelForce, 0);
+            Vector2d fontLeftRepelVector = new Vector2d((0 - frontLeftRepelForce * cosConst), (0 - frontLeftRepelForce * sinConst));
+            Vector2d frontRightRepelVector = new Vector2d((frontRightRepelForce * cosConst), (frontRightRepelForce * sinConst));
+            Vector2d repelForce = new Vector2d(fontRepelVector.x + fontLeftRepelVector.x + frontRightRepelVector.x,
+                    fontRepelVector.y + fontLeftRepelVector.y + frontRightRepelVector.y);
+            Vector2d repelForceVector = transform(direct, repelForce);
             Vector2d toGoal = new Vector2d((goal.x - pos.x), (goal.y - pos.y));
-            double disGoal = toGoal.length();
-            //利用目标的吸引力来引导
-            double goalForce = attractForce(disGoal);
-            Vector2d goalForceVector = new Vector2d((goalForce * toGoal.x / disGoal), (goalForce * toGoal.y / disGoal));
-            double x = repelForceVector.x + goalForceVector.x;
-            double y = repelForceVector.y + goalForceVector.y;
-            //合力
-            Vector2d allForces = new Vector2d(x, y);
+            double disToGoal = toGoal.length();
+            double goalForce = attractForce(disToGoal);
+            Vector2d goalForceVector = new Vector2d((goalForce * toGoal.x / disToGoal), (goalForce * toGoal.y / disToGoal));
+            Vector2d allForces = new Vector2d(repelForceVector.x + goalForceVector.x, repelForceVector.y + goalForceVector.y);
             double angle = getAngle(direct, allForces);
-            // 判断转动方向
             if (angle < Math.PI) {
                 setRotationalVelocity(angle);
             } else if (angle > Math.PI) {
                 setRotationalVelocity((angle - 2 * Math.PI));
             }
+            if (checkGoal()) {
+                setTranslationalVelocity(0);
+                setRotationalVelocity(0);
+                lamp.setOn(true);
+                return;
+            } else {
+                lamp.setOn(false);
+                setTranslationalVelocity(speed);
+            }
             checkHit();
         }
     }
-    protected int getQuadrant(Vector2d vector) //cal the quadrant of the agent
+    private int getQuadrant(Vector2d vector) //cal the quadrant of the agent
     {
         double x = vector.x;
         double y = vector.y;
@@ -105,7 +103,7 @@ public class ForceRobot extends RobotBase {
             return 0;//original porint
         }
     }
-    protected double getAngle(Vector2d v1, Vector2d v2) //cal rad of two vectors
+    private double getAngle(Vector2d v1, Vector2d v2) //cal rad of two vectors
     {
 
         double k = v1.y / v1.x;
@@ -163,7 +161,7 @@ public class ForceRobot extends RobotBase {
 
     }
     //利用速度方向和受力方向进行运动
-    protected Vector2d transform(Vector2d v, Vector2d point) {
+    private Vector2d transform(Vector2d v, Vector2d point) {
         Vector2d global = new Vector2d(1, 0);
         double alfa = getAngle(global, v);
         double beta = getAngle(point, v);
@@ -177,10 +175,10 @@ public class ForceRobot extends RobotBase {
         return new Vector2d(x, y);
 
     }
-    protected Vector3d getVelocity() {
+    private Vector3d getVelocity() {
         return this.linearVelocity; //linear velocity
     }
-    protected boolean checkHit() {
+    private boolean checkHit() {
         if (bumpers.oneHasHit()) {
             lamp.setBlink(true);
             double left = sonars.getFrontLeftQuadrantMeasurement();
@@ -204,26 +202,11 @@ public class ForceRobot extends RobotBase {
         }
     }
     //计算吸引力
-    protected double attractForce(double distance)
-    {
-        double force = attractConstant * distance;
-        return force;
+    private double attractForce(double distance) {
+        return attractConstant * distance;
     }
     //计算斥力
-    protected double repelForce(double distance, double range)
-    {
-        double force = 0;
-        Point3d p = new Point3d();
-        getCoords(p);
-        Vector2d pos = new Vector2d(p.z, p.x);
-        Vector2d toGoal = new Vector2d((goal.x - pos.x), (goal.y - pos.y));
-        double disGoal = toGoal.length();
-        double n = 0.5;
-        if (distance <= range)
-        {
-            force = (1 / distance - 1 / range) * (1 / distance - 1 / range) * repelConstant;
-        }
-
-        return force;
+    private double repelForce(double distance, double range) {
+        return distance <= range ? (1 / distance - 1 / range) * (1 / distance - 1 / range) * repelConstant : 0;
     }
 }

@@ -3,14 +3,12 @@ package robot;
 /**
  * Created by 63289 on 2016/12/30.
  */
-
 import simbad.sim.Agent;
 import simbad.sim.LightSensor;
+import simbad.sim.RangeSensorBelt;
 import simbad.sim.RobotFactory;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
-
 public class LightRobot extends RobotBase {
     //定义物体的最高速度
     private static final double MAX_VELOCITY = 0.4;
@@ -34,6 +32,7 @@ public class LightRobot extends RobotBase {
     }
     //最小角度
     private Sensor minAngle;
+    private RangeSensorBelt sonars;
     private LightSensor sensorFrontLeft;
     private LightSensor sensorFrontRight;
     private LightSensor sensorRearLeft;
@@ -65,16 +64,24 @@ public class LightRobot extends RobotBase {
         return RobotFactory.addLightSensor(agent, left, (float) (Math.PI / 4) * 3,"rear_left");
     }
     public void performBehavior() {
-        checkGoal();
-        //
+        if (checkGoal()) {
+            setTranslationalVelocity(0);
+            setRotationalVelocity(0);
+            lamp.setOn(true);
+            return;
+        } else {
+            lamp.setOn(false);
+        }
         Sensor minPositiveAngle = new Sensor();
         Sensor minNegativeAngle = new Sensor();
         //卡死
         if (collisionDetected()) moveToStartPosition();
         //震动测撞击
         if (bumpers.oneHasHit()) {
+            lamp.setBlink(true);
             setTranslationalVelocity(-0.1);
             setRotationalVelocity(0.1 * Math.random());
+            lamp.setBlink(false);
         } else {
             for (int i = 0; i < sonars.getNumSensors(); i++) {
                 //声纳检测撞击，判断障碍
@@ -96,8 +103,6 @@ public class LightRobot extends RobotBase {
             }
             double nextVel = MAX_VELOCITY;
             double nextAngVel = 0;
-
-            //if (minAngle.angle != 0) {
             double bestState = 0;
             for (double velocity = 0.001; velocity < MAX_VELOCITY; velocity += MAX_VELOCITY / 10) {
                 for (double angularVelocity = -MAX_ANGULAR_VELOCITY; angularVelocity < MAX_ANGULAR_VELOCITY; angularVelocity += MAX_ANGULAR_VELOCITY / 10) {
@@ -125,10 +130,8 @@ public class LightRobot extends RobotBase {
         double rearLeftLum = sensorRearLeft.getAverageLuminance();
         double rearRightLum = sensorRearRight.getAverageLuminance();
         if (Math.abs(rearRightLum - rightLum) + Math.abs(rearRightLum - leftLum) + Math.abs(rearRightLum - rearLeftLum) < 0.1) {
-            //检测到终点
-            setTranslationalVelocity(0);
-            setRotationalVelocity(0);
-            lamp.setOn(true);
+            setTranslationalVelocity(0.0);
+            setRotationalVelocity(0.1 * Math.random());
         }
         //目标角速度
         double desiredRotationalVelocity;

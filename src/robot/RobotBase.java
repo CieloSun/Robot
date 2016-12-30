@@ -17,7 +17,7 @@ public class RobotBase extends Agent {
     protected Vector2d goal = new Vector2d(8, 8);
     protected Vector3d goal3d = new Vector3d(8, 0, 8);
     protected Vector3d origin = null;
-    protected RangeSensorBelt sonars, bumpers;
+    protected RangeSensorBelt bumpers;
     protected LampActuator lamp;
     public RobotBase(Vector3d origin, Vector3d goal3d, String name){
         super(origin,name);
@@ -33,25 +33,10 @@ public class RobotBase extends Agent {
     public void initBehavior() {
     }
     //检查是否到达目的地
-    protected void checkGoal()
-    {
-        double speed=getTranslationalVelocity();
-        boolean checkGoal = false;
+    protected boolean checkGoal() {
         Point3d currentPos = new Point3d();
-        //当前坐标
         getCoords(currentPos);
         Point3d goalPos = new Point3d(goal3d.x, goal3d.y, goal3d.z);
-        // 如果当前距离目标点小于0.5那么即认为是到达
-        checkGoal = currentPos.distance(goalPos) <= 0.5;
-        if (checkGoal) {
-            // 到达目标点，停止运动
-            setTranslationalVelocity(0);
-            setRotationalVelocity(0);
-            lamp.setOn(true);
-            return;
-        } else {
-            lamp.setOn(false);
-            setTranslationalVelocity(speed);
-        }
+        return currentPos.distance(goalPos) <= 0.5;
     }
 }
