@@ -12,6 +12,12 @@ public class Controller extends Demo
 {
 	public Controller()
 	{
+	    Vector3d goal3d=new Vector3d(8, 0, 8);
+        light1IsOn = true;
+        light1SetPosition(goal3d.getX(),goal3d.getY(),goal3d.getZ());
+        light1Color=white;
+
+
 	    //v0 means x, v1 means z, v2 means y of the center position
         // length means the length of wall, height means the height of wall, wd means the width
     	Wall w1 = new Wall(new Vector3d(10, 0, 0), 20, 2, this);
@@ -29,38 +35,36 @@ public class Controller extends Demo
         add(w4); 
 
 
-        Wall w5 = new Wall(new Vector3d(6, 0, 3), 8, 2, this);
+        Wall w5 = new Wall(new Vector3d(6, 0, 3), 2, 2, this);
         add(w5); 
         Wall w6 = new Wall(new Vector3d(-4, 0,-4), 12, 2, this);
         add(w6); 
 
-        Wall w9 = new Wall(new Vector3d(-8, 0, -7), 2, 2, this);
-        w9.rotate90(1); 
-        add(w9); 
-        Wall w10 = new Wall(new Vector3d(5, 0, 5),4, 2, this);
-        w10.rotate90(1);
-        add(w10); 
+        Wall w7 = new Wall(new Vector3d(-6, 0, -8), 2, 2, this);
+        w7.rotate90(1);
+        add(w7);
+        Wall w8 = new Wall(new Vector3d(5, 0, 4),2, 2, this);
+        w8.rotate90(1);
+        add(w8);
 
-        Box b1 = new Box(new Vector3d(0,0,0), new Vector3f(3, 3, 3),this);
+        Box b1 = new Box(new Vector3d(0,0,0), new Vector3f(3, 5, 3),this);
         add(b1); 
-        Box b2 = new Box(new Vector3d(4,0,-4), new Vector3f(3, 3, 1),this);
+        Box b2 = new Box(new Vector3d(8,0,-4), new Vector3f(3, 3, 1),this);
         add(b2);
 
         Box b3 = new Box(new Vector3d(2,0,4), new Vector3f(1, 2, 1),this);
         add(b3);
 
-        Arch a1=new Arch(new Vector3d(3,0,7),this);
-        a1.rotate90(1);
-        add(a1);
-         
-        add(new AttractForceRobot(new Vector3d(-9, 0, -8),new Vector3d(8, 0, 8), "AttractForceRobot"));
-        add(new VFHRobot(new Vector3d(9, 0, -8),new Vector3d(8, 0, 8), "VFHRobot"));
-        add(new MovObstacle(new Vector3d(0, 0, 3), "MovObstacle"));
+        Box b4 = new Box(new Vector3d(-6,0,2), new Vector3f(1, 2, 8),this);
+        add(b4);
+        //光敏机器人
+        add(new LightRobot(new Vector3d(-9, 0, 3),goal3d,"LightRobot"));
+        //人工势力场机器人
+        add(new ForceRobot(new Vector3d(-9, 0, -8),goal3d, "ForceRobot"));
 	}
 
 	public static void main(String[] args)
 	{
-		//System.setProperty("j3d.implicitAntialiasing", "true");
 		Simbad frame = new Simbad(new Controller(), false);
 	}
 }

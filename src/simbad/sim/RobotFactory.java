@@ -153,12 +153,6 @@ public class RobotFactory extends Factory {
         agent.addSensorDevice(sensor, pos, angle);
         return sensor;
     }
-
-    /**
-     * Adds a prebuild light sensor on the left of the agent .
-     * @param agent
-     * @return the sensor object
-     */
     static public LightSensor addLightSensorLeft(Agent agent) {
         Vector3d front = new Vector3d(agent.getRadius()+0.5, 0, 0);
         Transform3D t3d = new Transform3D();
@@ -168,12 +162,6 @@ public class RobotFactory extends Factory {
         return RobotFactory.addLightSensor(agent, left, (float) Math.PI / 4,
                 "left");
     }
-
-    /**
-     * Adds a prebuild light sensor on the right of the agent .
-     * @param agent
-     * @return the sensor object
-     */
     static public LightSensor addLightSensorRight(Agent agent) {
         Vector3d front = new Vector3d(agent.getRadius()+0.5, 0, 0);
         Transform3D t3d = new Transform3D();
@@ -181,10 +169,10 @@ public class RobotFactory extends Factory {
         Vector3d right = new Vector3d(front);
         t3d.transform(right);
         return RobotFactory.addLightSensor(agent, right, (float) -Math.PI / 4,
-                "left");
+                "right");
     }
 
-    
+
     
     /**
      * Adds a prebuild key  input  to the agent.
