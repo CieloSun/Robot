@@ -34,6 +34,6 @@ public class RobotBase extends Agent {
         Point3d currentPos = new Point3d();
         getCoords(currentPos);
         Point3d goalPos = new Point3d(goal3d.x, goal3d.y, goal3d.z);
-        return currentPos.distance(goalPos) <= 0.5;
+        return currentPos.distance(goalPos) <= 1;
     }
 }

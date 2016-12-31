@@ -40,9 +40,9 @@ public class Controller extends Demo
         add(w8);
         Box b1 = new Box(new Vector3d(0,0,0), new Vector3f(3, 5, 3),this);
         add(b1); 
-        Box b2 = new Box(new Vector3d(8,0,-4), new Vector3f(3, 3, 1),this);
+        Box b2 = new Box(new Vector3d(8,0,1), new Vector3f(4, 3, 1),this);
         add(b2);
-        Box b3 = new Box(new Vector3d(2,0,9), new Vector3f(1, 2, 1),this);
+        Box b3 = new Box(new Vector3d(2,0,9), new Vector3f(1, 2, 1.5f),this);
         add(b3);
         Box b4 = new Box(new Vector3d(-6,0,2), new Vector3f(1, 2, 8),this);
         add(b4);

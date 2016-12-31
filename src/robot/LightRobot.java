@@ -69,8 +69,6 @@ public class LightRobot extends RobotBase {
         }
         Sensor minPositiveAngle = new Sensor();
         Sensor minNegativeAngle = new Sensor();
-        //卡死
-        if (collisionDetected()) moveToStartPosition();
         //震动测撞击
         if (bumpers.oneHasHit()) {
             lamp.setBlink(true);
@@ -101,7 +99,7 @@ public class LightRobot extends RobotBase {
             double bestState = 0;
             for (double velocity = 0.001; velocity < MAX_VELOCITY; velocity += MAX_VELOCITY / 10) {
                 for (double angularVelocity = -MAX_ANGULAR_VELOCITY; angularVelocity < MAX_ANGULAR_VELOCITY; angularVelocity += MAX_ANGULAR_VELOCITY / 10) {
-                    double heuristic = heuristicFunction(velocity, angularVelocity, 0.1, 5, 17);
+                    double heuristic = heuristicFunction(velocity, angularVelocity, 0.1, 5, 30);
                     if (heuristic > bestState) {
                         bestState = heuristic;
                         nextVel = velocity;
@@ -125,7 +123,6 @@ public class LightRobot extends RobotBase {
         double rearLeftLum = sensorRearLeft.getAverageLuminance();
         double rearRightLum = sensorRearRight.getAverageLuminance();
         if (Math.abs(rearRightLum - rightLum) + Math.abs(rearRightLum - leftLum) + Math.abs(rearRightLum - rearLeftLum) < 0.1) {
-            setTranslationalVelocity(0.0);
             setRotationalVelocity(0.1 * Math.random());
         }
         //目标角速度
@@ -171,8 +168,7 @@ public class LightRobot extends RobotBase {
         //没有障碍
         if (minAngle.angle == 0) {
             return Math.floor(2 - 2 * Math.abs(angularVelocity / Math.PI));
-            //判断符号是否相同，若不同
-        }
+        }//判断符号是否相同，若不同
         else if (Math.signum(minAngle.angle) != Math.signum(angularVelocity)) {
             angularVelocity = Math.signum(minAngle.angle) * angularVelocity;
             double angle = Math.abs(Math.sin(minAngle.angle) / minAngle.measurement);
