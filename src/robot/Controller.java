@@ -1,13 +1,12 @@
 package robot;
-
 import javax.vecmath.Vector3d; 
-import javax.vecmath.Vector3f; 
- 
- 
+import javax.vecmath.Vector3f;
 import simbad.sim.*; 
 import simbad.demo.*; 
 import simbad.gui.Simbad;
-
+/**
+ * Created by 63289 on 2016/12/28.
+ */
 public class Controller extends Demo
 {
 	public Controller()
@@ -43,7 +42,7 @@ public class Controller extends Demo
         add(b1); 
         Box b2 = new Box(new Vector3d(8,0,-4), new Vector3f(3, 3, 1),this);
         add(b2);
-        Box b3 = new Box(new Vector3d(2,0,8), new Vector3f(1, 2, 1),this);
+        Box b3 = new Box(new Vector3d(2,0,9), new Vector3f(1, 2, 1),this);
         add(b3);
         Box b4 = new Box(new Vector3d(-6,0,2), new Vector3f(1, 2, 8),this);
         add(b4);
@@ -52,7 +51,6 @@ public class Controller extends Demo
         //显示人工势场机器人
         add(new ForceRobot(new Vector3d(-9, 0, -8),goal3d, "ForceRobot"));
 	}
-
 	public static void main(String[] args)
 	{
 		Simbad frame = new Simbad(new Controller(), false);

@@ -1,5 +1,4 @@
 package robot;
-
 import simbad.sim.Agent;
 import simbad.sim.LampActuator;
 import simbad.sim.RangeSensorBelt;
@@ -8,7 +7,6 @@ import simbad.sim.RobotFactory;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
-
 /**
  * Created by 63289 on 2016/12/29.
  */
@@ -32,7 +30,6 @@ public class RobotBase extends Agent {
     }
     public void initBehavior() {
     }
-    //检查是否到达目的地
     protected boolean checkGoal() {
         Point3d currentPos = new Point3d();
         getCoords(currentPos);

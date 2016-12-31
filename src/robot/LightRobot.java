@@ -1,20 +1,16 @@
 package robot;
-
-/**
- * Created by 63289 on 2016/12/30.
- */
 import simbad.sim.Agent;
 import simbad.sim.LightSensor;
 import simbad.sim.RangeSensorBelt;
 import simbad.sim.RobotFactory;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
+/**
+ * Created by 63289 on 2016/12/30.
+ */
 public class LightRobot extends RobotBase {
-    //定义物体的最高速度
-    private static final double MAX_VELOCITY = 0.4;
-    //定义物体的最高角速度
-    private static final double MAX_ANGULAR_VELOCITY = Math.PI;
-    //定义结构体存储相关变量
+    private static final double MAX_VELOCITY = 0.4;    //定义物体的最高速度
+    private static final double MAX_ANGULAR_VELOCITY = Math.PI;    //定义物体的最高角速度
     private class Sensor {
         public double angle;
         public double measurement;
@@ -29,9 +25,8 @@ public class LightRobot extends RobotBase {
             this.measurement = measurement;
             this.number = number;
         }
-    }
-    //最小角度
-    private Sensor minAngle;
+    }    //定义结构体存储相关变量
+    private Sensor minAngle;//最小角度
     private RangeSensorBelt sonars;
     private LightSensor sensorFrontLeft;
     private LightSensor sensorFrontRight;
@@ -54,7 +49,7 @@ public class LightRobot extends RobotBase {
         Vector3d right = new Vector3d(front);
         t3d.transform(right);
         return RobotFactory.addLightSensor(agent, right, (float) (-Math.PI / 4) * 3,"rear_right");
-    }
+    }//定义方法：向右后添加光敏传感器
     static public LightSensor addLightSensorRearLeft(Agent agent) {
         Vector3d front = new Vector3d(agent.getRadius() + 0.5, 0, 0);
         Transform3D t3d = new Transform3D();
@@ -62,7 +57,7 @@ public class LightRobot extends RobotBase {
         Vector3d left = new Vector3d(front);
         t3d.transform(left);
         return RobotFactory.addLightSensor(agent, left, (float) (Math.PI / 4) * 3,"rear_left");
-    }
+    }//定义方法：向左后添加光敏传感器
     public void performBehavior() {
         if (checkGoal()) {
             setTranslationalVelocity(0);
@@ -106,7 +101,7 @@ public class LightRobot extends RobotBase {
             double bestState = 0;
             for (double velocity = 0.001; velocity < MAX_VELOCITY; velocity += MAX_VELOCITY / 10) {
                 for (double angularVelocity = -MAX_ANGULAR_VELOCITY; angularVelocity < MAX_ANGULAR_VELOCITY; angularVelocity += MAX_ANGULAR_VELOCITY / 10) {
-                    double heuristic = actionFunction(velocity, angularVelocity, 0.1, 5, 30);
+                    double heuristic = heuristicFunction(velocity, angularVelocity, 0.1, 5, 17);
                     if (heuristic > bestState) {
                         bestState = heuristic;
                         nextVel = velocity;
@@ -118,10 +113,10 @@ public class LightRobot extends RobotBase {
             setTranslationalVelocity(nextVel);
         }
     }
-    private double actionFunction(double velocity, double angularVelocity, double velocityWeight, double obstacleWeight, double aimWeight) {
+    private double heuristicFunction(double velocity, double angularVelocity, double velocityWeight, double obstacleWeight, double lightWeight) {
         return velocityFactor(velocity, angularVelocity) * velocityWeight
                 + obstacleFactor(velocity, angularVelocity) * obstacleWeight
-                + lightFactor(velocity, angularVelocity) * aimWeight;
+                + lightFactor(velocity, angularVelocity) * lightWeight;
     }
     private double lightFactor(double velocity, double angularVelocity) {
         //获取传感器检测值

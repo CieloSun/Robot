@@ -1,23 +1,18 @@
 package robot;
-
 import simbad.sim.RangeSensorBelt;
 import simbad.sim.RobotFactory;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
-
 /**
  * Created by 63289 on 2016/12/28.
- * 使用人工势场法进行运动的agent
  */
 public class ForceRobot extends RobotBase {
-
     private static final double repelConstant = 100.0;// 斥力系数
     private static final double rangeConst = 4.0;//斥力作用范围
     private double attractConstant = 30.0;// 引力系数
-    private RangeSensorBelt sonars;
-    private double speed = 0.5;
+    private RangeSensorBelt sonars;//9向声纳
+    private double speed = 0.5;//速度设定
     public ForceRobot(Vector3d origin, Vector3d goal3d, String name) {
         super(origin, goal3d, name);
         sonars = RobotFactory.addSonarBeltSensor(this);//the sonar sensor
@@ -28,32 +23,35 @@ public class ForceRobot extends RobotBase {
     }
     public void performBehavior() {
         if (getCounter() % 10 == 0) {
-            Vector3d velocity = getVelocity();
-            Vector2d direct = new Vector2d(velocity.z, velocity.x);
+            Vector3d velocity = linearVelocity;
+            Vector2d velocity2d = new Vector2d(velocity.z, velocity.x);
             Point3d posPoint = new Point3d();
             //获取当前位置
             getCoords(posPoint);
             Vector2d pos = new Vector2d(posPoint.z, posPoint.x);
+            //测量三个方向的距离
             double frontDistance = sonars.getMeasurement(0);
             double frontLeftDistance = sonars.getMeasurement(1);
             double frontRightDistance = sonars.getMeasurement(8);
-            double frontRepelForce = repelForce(frontDistance, rangeConst);
-            double frontLeftRepelForce = repelForce(frontLeftDistance, rangeConst);
-            double frontRightRepelForce = repelForce(frontRightDistance, rangeConst);
+            //计算三个方向的排斥力
+            double frontRepelForce = getRepelForce(frontDistance, rangeConst);
+            double frontLeftRepelForce = getRepelForce(frontLeftDistance, rangeConst);
+            double frontRightRepelForce = getRepelForce(frontRightDistance, rangeConst);
             double cosConst = Math.cos(2 * Math.PI / 9);
             double sinConst = Math.sin(2 * Math.PI / 9);
             Vector2d fontRepelVector = new Vector2d(0 - frontRepelForce, 0);
             Vector2d fontLeftRepelVector = new Vector2d((0 - frontLeftRepelForce * cosConst), (0 - frontLeftRepelForce * sinConst));
             Vector2d frontRightRepelVector = new Vector2d((frontRightRepelForce * cosConst), (frontRightRepelForce * sinConst));
+            //计算排斥力的合力
             Vector2d repelForce = new Vector2d(fontRepelVector.x + fontLeftRepelVector.x + frontRightRepelVector.x,
                     fontRepelVector.y + fontLeftRepelVector.y + frontRightRepelVector.y);
-            Vector2d repelForceVector = transform(direct, repelForce);
+            Vector2d repelForceVector = forceResolve(velocity2d, repelForce);
             Vector2d toGoal = new Vector2d((goal.x - pos.x), (goal.y - pos.y));
             double disToGoal = toGoal.length();
-            double goalForce = attractForce(disToGoal);
+            double goalForce = getAttractForce(disToGoal);
             Vector2d goalForceVector = new Vector2d((goalForce * toGoal.x / disToGoal), (goalForce * toGoal.y / disToGoal));
             Vector2d allForces = new Vector2d(repelForceVector.x + goalForceVector.x, repelForceVector.y + goalForceVector.y);
-            double angle = getAngle(direct, allForces);
+            double angle = getAngle(velocity2d, allForces);
             if (angle < Math.PI) {
                 setRotationalVelocity(angle);
             } else if (angle > Math.PI) {
@@ -160,23 +158,11 @@ public class ForceRobot extends RobotBase {
         }
 
     }
-    //利用速度方向和受力方向进行运动
-    private Vector2d transform(Vector2d v, Vector2d point) {
-        Vector2d global = new Vector2d(1, 0);
-        double alfa = getAngle(global, v);
-        double beta = getAngle(point, v);
-
-        double k1 = Math.cos(alfa + beta) / Math.cos(beta);
-        double k2 = Math.sin(alfa + beta) / Math.sin(beta);
-
-        double x = point.x * k1;
-        double y = point.y * k2;
-
-        return new Vector2d(x, y);
-
-    }
-    private Vector3d getVelocity() {
-        return this.linearVelocity; //linear velocity
+    private Vector2d forceResolve(Vector2d velocity, Vector2d force) {
+        Vector2d xAxis = new Vector2d(1, 0);
+        double alfa = getAngle(xAxis, velocity);
+        double beta = getAngle(force, velocity);
+        return new Vector2d( force.x * Math.cos(alfa + beta) / Math.cos(beta), force.y * Math.sin(alfa + beta) / Math.sin(beta));
     }
     private boolean checkHit() {
         if (bumpers.oneHasHit()) {
@@ -202,11 +188,11 @@ public class ForceRobot extends RobotBase {
         }
     }
     //计算吸引力
-    private double attractForce(double distance) {
+    private double getAttractForce(double distance) {
         return attractConstant * distance;
     }
     //计算斥力
-    private double repelForce(double distance, double range) {
+    private double getRepelForce(double distance, double range) {
         return distance <= range ? (1 / distance - 1 / range) * (1 / distance - 1 / range) * repelConstant : 0;
     }
 }
